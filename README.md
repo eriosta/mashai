@@ -6,7 +6,7 @@ pip install -r requirements.txt
 ```
 
 ## Getting started
-Check the notebook [`Getting started.ipynb`](https://github.com/eriosta/mashai/blob/main/Getting%20started.ipynb) to see the full usage. 
+Check the notebook `Getting started.ipynb` or run on [Colab](https://colab.research.google.com/drive/1y8CcnN_y9dkk6OqZjRIsbEoEmuayYJFW?usp=sharing) to see the full usage. 
 
 ## Make predictions
 Before making predictions for external validation, make sure of the following:
@@ -18,7 +18,7 @@ Before making predictions for external validation, make sure of the following:
    - AGE IN YEARS AT SCREENING
    - BODY MASS INDEX (KG/M**2)
 3. Know which MASH AI model to use. Either MASH AI 35 trained with FAST >= 0.35 threshold or MASH AI 67 trained with FAST >= 0.67 threshold. 
-4. The script [`predict.py`](https://github.com/eriosta/mashai/blob/main/predict.py) will return the predicted label (1 or 0) and the probability of prediction (1 to 0), where 1 is at-risk MASH and 0 is *no* at-risk MASH
+4. The script `predict.py` will return the predicted label (1 or 0) and the probability of prediction (1 to 0), where 1 is at-risk MASH and 0 is *no* at-risk MASH
 
 ```bash
 python predict.py {YOUR_DATA_SOURCE_HERE.csv} {MODEL_NAME_HERE}
