@@ -77,7 +77,7 @@ class XGBClassifier:
         def objective(params):
             clf = xgb.XGBClassifier(**params, use_label_encoder=False, eval_metric='logloss')
             kf = KFold(n_splits=self.n_folds, shuffle=True)
-            geometric_means = []
+            means = []
 
             for train_index, test_index in kf.split(X):
                 X_train, X_test = X.iloc[train_index], X.iloc[test_index]
@@ -93,11 +93,11 @@ class XGBClassifier:
                 npv = tn / (tn + fn) if (tn + fn) > 0 else 0
 
                 # Calculate the geometric mean of sensitivity, specificity, ppv, and npv
-                geometric_mean = gmean([metric for metric in [sensitivity, specificity, ppv, npv] if metric > 0])
-                # geometric_mean = hmean([metric for metric in [sensitivity, specificity, ppv, npv] if metric > 0])
-                geometric_means.append(geometric_mean)
+                # geometric_mean = gmean([metric for metric in [sensitivity, specificity, ppv, npv] if metric > 0])
+                mean = hmean([metric for metric in [sensitivity, specificity, ppv, npv] if metric > 0])
+                means.append(mean)
 
-            return {'loss': -np.mean(geometric_means), 'status': STATUS_OK}
+            return {'loss': -np.mean(means), 'status': STATUS_OK}
 
         trials = Trials()
         best = fmin(fn=objective,
