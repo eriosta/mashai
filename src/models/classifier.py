@@ -1,6 +1,7 @@
 # src/models/xgb_classifier.py
 
 import numpy as np
+import pandas as pd
 from hyperopt import hp, fmin, tpe, Trials, STATUS_OK, space_eval
 import xgboost as xgb
 from sklearn.metrics import roc_auc_score, accuracy_score, confusion_matrix
@@ -114,3 +115,34 @@ class XGBClassifier:
             raise Exception("Model has not been optimized yet. Please run optimize() first.")
         self.model = xgb.XGBClassifier(**self.best_params, use_label_encoder=False, eval_metric='logloss')
         self.model.fit(X, y)
+
+    def evaluate(self, X_test, y_test):
+        if self.model is None:
+            raise Exception("Model is not trained. Please run fit() first.")
+
+        y_pred = self.model.predict(X_test)
+        y_pred_proba = self.model.predict_proba(X_test)[:, 1]
+
+        auroc = roc_auc_score(y_test, y_pred_proba)
+        accuracy = accuracy_score(y_test, y_pred)
+        tn, fp, fn, tp = confusion_matrix(y_test, y_pred).ravel()
+        sensitivity = tp / (tp + fn)
+        specificity = tn / (tn + fp)
+        ppv = tp / (tp + fp)
+        npv = tn / (tn + fn)
+
+        metrics = {
+            'AUROC': auroc,
+            'Accuracy': accuracy,
+            'Sensitivity': sensitivity,
+            'Specificity': specificity,
+            'PPV': ppv,
+            'NPV': npv
+        }
+
+        results_df = pd.DataFrame()
+        results_df['y_test'] = y_test
+        results_df['y_pred'] = y_pred
+        results_df['y_pred_proba'] = y_pred_proba
+
+        return metrics, results_df
