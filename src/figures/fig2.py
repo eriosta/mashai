@@ -9,15 +9,18 @@ from sklearn.utils import resample
 np.random.seed(42)
 
 # List of model filenames
-model_filenames = ['xgboost_mashai_67.pkl', 'xgboost_mashai_35.pkl']
+model_filenames = ['xgboost_all_mashai_67.pkl', 'xgboost_all_mashai_35.pkl']
 
 for model_filename in model_filenames:
     # Load the model from the file
     with open(model_filename, 'rb') as file:
         model = pickle.load(file)
 
-    # Load your data
-    df = pd.read_csv('data/processed/NhanesPrepandemicSubset.csv').drop('Unnamed: 0', axis=1)
+    # Load subset data
+    # df = pd.read_csv('data/processed/NhanesPrepandemicSubset.csv').drop('Unnamed: 0', axis=1)
+    
+    # Load all data
+    df = pd.read_csv('data/processed/NhanesPrepandemicAll.csv').drop('Unnamed: 0', axis=1)
     
     # Determine the target column based on the model filename
     if '67' in model_filename:
