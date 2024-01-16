@@ -89,29 +89,43 @@ class DemographicsDataHandler:
 
 class ClinicalDataTransformation:
     @staticmethod
-    def transform_calculate_scores(data, scores=['HOMAIR','FIB4','NFS','APRI','BARD']):
+    def transform_calculate_scores(data, scores=['HOMAIR','FIB4','NFS','APRI','BARD'], impute=False):
+        if impute:
+            from sklearn.impute import KNNImputer
+            imputer = KNNImputer(n_neighbors=5)
+            columns_to_impute = ['AGE IN YEARS AT SCREENING', 'GENDER', 'GLYCOHEMOGLOBIN (%)', 'DOCTOR TOLD YOU HAVE DIABETES', 'BODY MASS INDEX (KG/M**2)', 'WAIST CIRCUMFERENCE (CM)', 'AST (U/L)', 'ALANINE AMINOTRANSFERASE (ALT) (U/L)', 'GAMMA GLUTAMYL TRANSFERASE (GGT) (IU/L)', 'INSULIN (μU/ML)', 'PLATELET COUNT (1000 CELLS/UL)']
+            imputed_data = data.copy()
+            imputed_data[columns_to_impute] = imputer.fit_transform(imputed_data[columns_to_impute])
+
         for score in scores:
             if score == 'FIB4':
                 print("Calculating " + score)
-                data = data.assign(FIB4 = lambda x: ( x['AGE IN YEARS AT SCREENING']*x['ASPARTATE AMINOTRANSFERASE (AST) (U/L)'] / x['PLATELET COUNT (1000 CELLS/UL)']*np.sqrt(x['ALANINE AMINOTRANSFERASE (ALT) (U/L)']) ) ) 
+                data['FIB4'] = (imputed_data['AGE IN YEARS AT SCREENING']*imputed_data['ASPARTATE AMINOTRANSFERASE (AST) (U/L)'] / imputed_data['PLATELET COUNT (1000 CELLS/UL)']*np.sqrt(imputed_data['ALANINE AMINOTRANSFERASE (ALT) (U/L)']))
             elif score == 'HOMAIR':
                 print("Calculating " + score)
-                data = data.assign(HOMAIR = lambda x: ( x['INSULIN (μU/ML)'] * x['FASTING GLUCOSE (MG/DL)'] / 405) )
+                data['HOMAIR'] = (imputed_data['INSULIN (μU/ML)'] * imputed_data['FASTING GLUCOSE (MG/DL)'] / 405)
             elif score == 'NFS':
                 print("Calculating " + score)
-                data = data.assign(NFS = lambda x: ( x['AGE IN YEARS AT SCREENING']*0.037 + x['BODY MASS INDEX (KG/M**2)']*0.094 + x['DOCTOR TOLD YOU HAVE DIABETES']*1.13 + x['ASPARTATE AMINOTRANSFERASE (AST) (U/L)']/x['ALANINE AMINOTRANSFERASE (ALT) (U/L)']*0.99 - x['PLATELET COUNT (1000 CELLS/UL)']*0.013 - x['ALBUMIN, REFRIGERATED SERUM (G/DL)']*0.66 ) )
+                data['NFS'] = (imputed_data['AGE IN YEARS AT SCREENING']*0.037 + imputed_data['BODY MASS INDEX (KG/M**2)']*0.094 + imputed_data['DOCTOR TOLD YOU HAVE DIABETES']*1.13 + imputed_data['ASPARTATE AMINOTRANSFERASE (AST) (U/L)']/imputed_data['ALANINE AMINOTRANSFERASE (ALT) (U/L)']*0.99 - imputed_data['PLATELET COUNT (1000 CELLS/UL)']*0.013 - imputed_data['ALBUMIN, REFRIGERATED SERUM (G/DL)']*0.66)
             elif score == 'APRI':
                 print("Calculating " + score)
-                data = data.assign(APRI = lambda x: ( x['ASPARTATE AMINOTRANSFERASE (AST) (U/L)']*40 / x['PLATELET COUNT (1000 CELLS/UL)'] )) 
+                data['APRI'] = (imputed_data['ASPARTATE AMINOTRANSFERASE (AST) (U/L)']*40 / imputed_data['PLATELET COUNT (1000 CELLS/UL)'])
             elif score == 'BARD':
                 print("Calculating " + score)
-                data = data.assign(BARD = lambda x: (1*(x['BODY MASS INDEX (KG/M**2)'] >= 28).astype(int) + 2*(x['ASPARTATE AMINOTRANSFERASE (AST) (U/L)']/x['ALANINE AMINOTRANSFERASE (ALT) (U/L)'] >= 0.8).astype(int) + 1*(x['DOCTOR TOLD YOU HAVE DIABETES'] == 1).astype(int)))
+                data['BARD'] = (1*(imputed_data['BODY MASS INDEX (KG/M**2)'] >= 28).astype(int) + 2*(imputed_data['ASPARTATE AMINOTRANSFERASE (AST) (U/L)']/imputed_data['ALANINE AMINOTRANSFERASE (ALT) (U/L)'] >= 0.8).astype(int) + 1*(imputed_data['DOCTOR TOLD YOU HAVE DIABETES'] == 1).astype(int))
 
         return data
 
     @staticmethod
-    def add_isDM_column(data):
-        data['isDM'] = data[['GLYCOHEMOGLOBIN (%)', 'DOCTOR TOLD YOU HAVE DIABETES']].apply(lambda x: 1 if x['GLYCOHEMOGLOBIN (%)'] >= 6.5 and x['DOCTOR TOLD YOU HAVE DIABETES'] == 1 else 0, axis=1)
+    def add_isDM_column(data, impute=False):
+        if impute:
+            from sklearn.impute import KNNImputer
+            imputer = KNNImputer(n_neighbors=5)
+            columns_to_impute = ['GLYCOHEMOGLOBIN (%)', 'DOCTOR TOLD YOU HAVE DIABETES']
+            imputed_data = data.copy()
+            imputed_data[columns_to_impute] = imputer.fit_transform(imputed_data[columns_to_impute])
+
+        data['isDM'] = imputed_data[['GLYCOHEMOGLOBIN (%)', 'DOCTOR TOLD YOU HAVE DIABETES']].apply(lambda x: 1 if x['GLYCOHEMOGLOBIN (%)'] >= 6.5 and x['DOCTOR TOLD YOU HAVE DIABETES'] == 1 else 0, axis=1)
         print("New column added: isDM")
         print(f"Number of unique respondents with diabetes: {data[data['isDM'] == 1]['RESPONDENT SEQUENCE NUMBER'].nunique()}")
         return data
