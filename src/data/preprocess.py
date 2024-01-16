@@ -93,7 +93,7 @@ class ClinicalDataTransformation:
         if impute:
             from sklearn.impute import KNNImputer
             imputer = KNNImputer(n_neighbors=5)
-            columns_to_impute = ['AGE IN YEARS AT SCREENING', 'GENDER', 'GLYCOHEMOGLOBIN (%)', 'DOCTOR TOLD YOU HAVE DIABETES', 'BODY MASS INDEX (KG/M**2)', 'WAIST CIRCUMFERENCE (CM)', 'AST (U/L)', 'ALANINE AMINOTRANSFERASE (ALT) (U/L)', 'GAMMA GLUTAMYL TRANSFERASE (GGT) (IU/L)', 'INSULIN (μU/ML)', 'PLATELET COUNT (1000 CELLS/UL)']
+            columns_to_impute = ['AGE IN YEARS AT SCREENING', 'GENDER', 'GLYCOHEMOGLOBIN (%)', 'DOCTOR TOLD YOU HAVE DIABETES', 'BODY MASS INDEX (KG/M**2)', 'WAIST CIRCUMFERENCE (CM)', 'ASPARTATE AMINOTRANSFERASE (AST) (U/L)', 'ALANINE AMINOTRANSFERASE (ALT) (U/L)', 'GAMMA GLUTAMYL TRANSFERASE (GGT) (IU/L)', 'INSULIN (μU/ML)', 'PLATELET COUNT (1000 CELLS/UL)']
             imputed_data = data.copy()
             imputed_data[columns_to_impute] = imputer.fit_transform(imputed_data[columns_to_impute])
 
