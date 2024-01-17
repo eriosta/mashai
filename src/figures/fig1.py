@@ -5,7 +5,7 @@ from sklearn.model_selection import train_test_split, StratifiedKFold
 from sklearn.metrics import roc_curve, auc
 import numpy as np
 
-np.random.seed(42)
+# np.random.seed(42)
 
 # NPG color palette as a dictionary
 color_palette = {
@@ -25,7 +25,7 @@ color_palette = {
 colors_list = list(color_palette.values())
 
 # List of model filenames
-model_filenames = ['xgboost_all_mashai_67.pkl', 'xgboost_all_mashai_35.pkl']
+model_filenames = ['xgboost_mashai_67.pkl', 'xgboost_mashai_35.pkl']
 
 for model_filename in model_filenames:
     # Load the model from the file
@@ -33,10 +33,10 @@ for model_filename in model_filenames:
         model = pickle.load(file)
 
     # # Load subset data
-    # df = pd.read_csv('data/processed/NhanesPrepandemicSubset.csv').drop('Unnamed: 0',axis=1)
+    df = pd.read_csv('data/processed/NhanesPrepandemicSubset.csv').drop('Unnamed: 0',axis=1)
     
     # Load all data
-    df = pd.read_csv('data/processed/NhanesPrepandemicAll.csv').drop('Unnamed: 0',axis=1)
+    # df = pd.read_csv('data/processed/NhanesPrepandemicAll.csv').drop('Unnamed: 0',axis=1)
     
     # Determine the target column based on the model filename
     if '67' in model_filename:
@@ -48,7 +48,7 @@ for model_filename in model_filenames:
     else:
         raise ValueError("Invalid model filename. Model should end with '67' or '35'.")
 
-    def stratified_split(df, target, test_size=0.2, random_state=None):
+    def stratified_split(df, target, test_size=0.2, random_state=42):
         X = df.drop(columns=[target])
         y = df[target]
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=random_state, stratify=y)

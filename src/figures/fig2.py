@@ -5,11 +5,11 @@ from sklearn.metrics import roc_auc_score, accuracy_score, confusion_matrix
 import numpy as np
 from sklearn.utils import resample
 
-# Set a random seed
-np.random.seed(42)
+# # Set a random seed
+# np.random.seed(42)
 
 # List of model filenames
-model_filenames = ['xgboost_all_mashai_67.pkl', 'xgboost_all_mashai_35.pkl']
+model_filenames = ['xgboost_mashai_67.pkl', 'xgboost_mashai_35.pkl']
 
 for model_filename in model_filenames:
     # Load the model from the file
@@ -17,10 +17,10 @@ for model_filename in model_filenames:
         model = pickle.load(file)
 
     # Load subset data
-    # df = pd.read_csv('data/processed/NhanesPrepandemicSubset.csv').drop('Unnamed: 0', axis=1)
+    df = pd.read_csv('data/processed/NhanesPrepandemicSubset.csv').drop('Unnamed: 0', axis=1)
     
     # Load all data
-    df = pd.read_csv('data/processed/NhanesPrepandemicAll.csv').drop('Unnamed: 0', axis=1)
+    # df = pd.read_csv('data/processed/NhanesPrepandemicAll.csv').drop('Unnamed: 0', axis=1)
     
     # Determine the target column based on the model filename
     if '67' in model_filename:
@@ -69,7 +69,7 @@ for model_filename in model_filenames:
         return aurocs, accuracies, sensitivities, specificities, ppvs, npvs
 
     # Split the data
-    X_train, X_test, y_train, y_test = train_test_split(df.drop(columns=[target_column]), df[target_column], test_size=0.2, random_state=None, stratify=df[target_column])
+    X_train, X_test, y_train, y_test = train_test_split(df.drop(columns=[target_column]), df[target_column], test_size=0.2, random_state=42, stratify=df[target_column])
 
     # Perform bootstrap evaluation
     aurocs, accuracies, sensitivities, specificities, ppvs, npvs = bootstrap_evaluate(model, X_test, y_test)

@@ -3,7 +3,7 @@ import pandas as pd
 import pickle
 from sklearn.model_selection import train_test_split, StratifiedKFold
 import numpy as np
-import shap  # Make sure to install SHAP using 'pip install shap'
+import shap 
 
 np.random.seed(42)
 
@@ -32,7 +32,7 @@ for model_filename in model_filenames:
     else:
         raise ValueError("Invalid model filename. Model should end with '67' or '35'.")
 
-    def stratified_split(df, target, test_size=0.2, random_state=None):
+    def stratified_split(df, target, test_size=0.2, random_state=42):
         X = df.drop(columns=[target])
         y = df[target]
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=random_state, stratify=y)
