@@ -3,9 +3,6 @@ import pandas as pd
 import pickle
 from sklearn.model_selection import train_test_split, StratifiedKFold
 from sklearn.metrics import roc_curve, auc
-import numpy as np
-
-# np.random.seed(42)
 
 # NPG color palette as a dictionary
 color_palette = {
@@ -24,20 +21,23 @@ color_palette = {
 # Create a list of colors from the palette
 colors_list = list(color_palette.values())
 
-# List of model filenames
-model_filenames = ['xgboost_mashai_67.pkl', 'xgboost_mashai_35.pkl']
+# Define a dictionary that maps model filenames to dataset filenames
+model_to_dataset = {
+    'xgboost_mashai_67.pkl': 'NhanesPrepandemicSubset.csv',
+    'xgboost_mashai_35.pkl': 'NhanesPrepandemicSubset.csv',
+    'xgboost_all_mashai_67.pkl': 'NhanesPrepandemicAll.csv',
+    'xgboost_all_mashai_35.pkl': 'NhanesPrepandemicAll.csv'
+}
 
-for model_filename in model_filenames:
+for model_filename in model_to_dataset.keys():
     # Load the model from the file
     with open(model_filename, 'rb') as file:
         model = pickle.load(file)
 
-    # # Load subset data
-    df = pd.read_csv('data/processed/NhanesPrepandemicSubset.csv').drop('Unnamed: 0',axis=1)
-    
-    # Load all data
-    # df = pd.read_csv('data/processed/NhanesPrepandemicAll.csv').drop('Unnamed: 0',axis=1)
-    
+    # Load the corresponding dataset
+    dataset_filename = model_to_dataset[model_filename]
+    df = pd.read_csv(f'data/processed/{dataset_filename}').drop('Unnamed: 0', axis=1)
+
     # Determine the target column based on the model filename
     if '67' in model_filename:
         target_column = 'isAtRiskMASH67'
@@ -83,4 +83,4 @@ for model_filename in model_filenames:
     # Save the figure as a high-quality TIFF file
     plt.savefig(f'{title}.tiff', format='tiff', dpi=300, bbox_inches='tight')
 
-    plt.show() # You can remove this line or comment it out as the plot is now being saved to a file
+    # plt.show() # You can remove this line or comment it out as the plot is now being saved to a file

@@ -5,23 +5,23 @@ from sklearn.metrics import roc_auc_score, accuracy_score, confusion_matrix
 import numpy as np
 from sklearn.utils import resample
 
-# # Set a random seed
-# np.random.seed(42)
+# Define a dictionary that maps model filenames to dataset filenames
+model_to_dataset = {
+    'xgboost_mashai_67.pkl': 'NhanesPrepandemicSubset.csv',
+    'xgboost_mashai_35.pkl': 'NhanesPrepandemicSubset.csv',
+    'xgboost_all_mashai_67.pkl': 'NhanesPrepandemicAll.csv',
+    'xgboost_all_mashai_35.pkl': 'NhanesPrepandemicAll.csv'
+}
 
-# List of model filenames
-model_filenames = ['xgboost_mashai_67.pkl', 'xgboost_mashai_35.pkl']
-
-for model_filename in model_filenames:
+for model_filename in model_to_dataset.keys():
     # Load the model from the file
     with open(model_filename, 'rb') as file:
         model = pickle.load(file)
 
-    # Load subset data
-    df = pd.read_csv('data/processed/NhanesPrepandemicSubset.csv').drop('Unnamed: 0', axis=1)
-    
-    # Load all data
-    # df = pd.read_csv('data/processed/NhanesPrepandemicAll.csv').drop('Unnamed: 0', axis=1)
-    
+    # Load the corresponding dataset
+    dataset_filename = model_to_dataset[model_filename]
+    df = pd.read_csv(f'data/processed/{dataset_filename}').drop('Unnamed: 0', axis=1)
+
     # Determine the target column based on the model filename
     if '67' in model_filename:
         target_column = 'isAtRiskMASH67'
