@@ -62,7 +62,7 @@ class DemographicsDataHandler:
 
         # Creating new columns
         df['isNotViralHepatitis'] = ((df['HEPATITIS B SURFACE ANTIBODY'] != 1) | (df['HEPATITIS C ANTIBODY (CONFIRMED)'] != 1))
-        print(f"* Subjects without viral hepatitis, N: {df[df['isNotViralHepatitis'] == 1]['RESPONDENT SEQUENCE NUMBER'].nunique()}")
+        print(f"* Subjects with viral hepatitis, N: {initial_unique_ids - df[df['isNotViralHepatitis'] == 1]['RESPONDENT SEQUENCE NUMBER'].nunique()}")
 
         df['Alcohol_g_per_day'] = df['AVG # ALCOHOLIC DRINKS/DAY - PAST 12 MOS'] * 14
 
