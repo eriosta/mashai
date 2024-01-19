@@ -115,7 +115,7 @@ class ClinicalDataTransformation:
             imputed_data[columns_to_impute] = imputer.fit_transform(imputed_data[columns_to_impute])
 
         data['isDM'] = imputed_data[['GLYCOHEMOGLOBIN (%)', 'DOCTOR TOLD YOU HAVE DIABETES']].apply(lambda x: 1 if x['GLYCOHEMOGLOBIN (%)'] >= 6.5 and x['DOCTOR TOLD YOU HAVE DIABETES'] == 1 else 0, axis=1)
-        print("* Note: Subjects with diabetes mellitus, N: {data[data['isDM'] == 1]['RESPONDENT SEQUENCE NUMBER'].nunique()}")
+        print(f"* Note: Subjects with diabetes mellitus, N: {data[data['isDM'] == 1]['RESPONDENT SEQUENCE NUMBER'].nunique()}")
         return data
 
 class ColumnsTextDataHandler:
