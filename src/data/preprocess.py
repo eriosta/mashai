@@ -24,7 +24,7 @@ class VCTEDataHandler:
                          (data['COUNT:MEASURES ATTEMPTED WITH FINAL WAND'] >= 10) & \
                          (data['STIFFNESS E INTERQUARTILE RANGE (IQRE)'] < 30)
         data.loc[:, 'isGoodFibroScan'] = np.where(condition_mask, 1, 0)
-        print(f"* Appropriate FibroScan measurements (>=10 measurements and IQR LSM <30%), N: {data[data['isGoodFibroScan'] == 1]['RESPONDENT SEQUENCE NUMBER'].nunique()}")
+        print(f"* Subjects without appropriate FibroScan measurements (>=10 measurements and IQR LSM <30%), N: {initial_unique_ids - data[data['isGoodFibroScan'] == 1]['RESPONDENT SEQUENCE NUMBER'].nunique()}")
 
         return data
 
