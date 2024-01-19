@@ -24,14 +24,14 @@ class VCTEDataHandler:
                          (data['COUNT:MEASURES ATTEMPTED WITH FINAL WAND'] >= 10) & \
                          (data['STIFFNESS E INTERQUARTILE RANGE (IQRE)'] < 30)
         data.loc[:, 'isGoodFibroScan'] = np.where(condition_mask, 1, 0)
-        print("* Appropriate FibroScan measurements (>=10 measurements and IQR LSM <30%), N: {data[data['isGoodFibroScan'] == 1]['RESPONDENT SEQUENCE NUMBER'].nunique()}")
+        print(f"* Appropriate FibroScan measurements (>=10 measurements and IQR LSM <30%), N: {data[data['isGoodFibroScan'] == 1]['RESPONDENT SEQUENCE NUMBER'].nunique()}")
 
         return data
 
     @staticmethod
     def calculate_fast_score(data):
         """Calculates the FAST score."""
-        print("Calculate FAST score with formula:")
+        print("* FAST scores calculated using the formula: FAST = -1.65 + 1.07 * log(MEDIAN STIFFNESS (E), KILOPASCALS (KPA)) + 2.66*(10**-8) * (MEDIAN CAP, DECIBELS PER METER (DB/M))^3 - 63.3 * (ASPARTATE AMINOTRANSFERASE (AST) (U/L))^-1")
         exponent = -1.65 + 1.07 * np.log(data['MEDIAN STIFFNESS (E), KILOPASCALS (KPA)']) + \
                    2.66*(10**-8) * data['MEDIAN CAP, DECIBELS PER METER (DB/M)']**3 - \
                    63.3 * data['ASPARTATE AMINOTRANSFERASE (AST) (U/L)']**-1
