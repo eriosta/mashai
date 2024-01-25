@@ -22,6 +22,8 @@ class XGBClassifier:
             'gamma': hp.quniform('gamma', 0, 10, 0.5),  # Expanded range and precision
             'reg_lambda': hp.uniform('reg_lambda', 0, 5),  # Expanded range
             'reg_alpha': hp.uniform('reg_alpha', 0, 5),  # Expanded range
+            'tree_method': 'hist',  # Use 'hist' for histogram-based algorithm
+            'device': 'cuda',  # Use GPU with CUDA
         }
 
     def optimize(self, X, y):
