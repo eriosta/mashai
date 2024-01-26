@@ -43,8 +43,6 @@ class XGBClassifier:
             # Initialize wandb run
             wandb.init(project="xgb_optimization", entity="siena", config=self.space)
 
-            params['early_stopping_rounds'] = 10
-
             clf = xgb.XGBClassifier(**params, use_label_encoder=False, eval_metric='logloss')
             clf.fit(X_train, y_train, eval_set=[(X_val, y_val)])
 
@@ -91,7 +89,7 @@ class XGBClassifier:
         self.model = xgb.XGBClassifier(**self.best_params, use_label_encoder=False, eval_metric='logloss')
         
         if X_val is not None and y_val is not None:
-            self.model.fit(X_train, y_train, early_stopping_rounds=10, eval_set=[(X_val, y_val)])
+            self.model.fit(X_train, y_train, eval_set=[(X_val, y_val)])
         else:
             self.model.fit(X_train, y_train)
 
