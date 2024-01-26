@@ -5,13 +5,8 @@ import pandas as pd
 from hyperopt import hp, fmin, tpe, Trials, STATUS_OK, space_eval
 import xgboost as xgb
 from sklearn.metrics import roc_auc_score, accuracy_score, confusion_matrix
-from sklearn.model_selection import KFold
-from scipy.stats import hmean, gmean
-
-#   0%|          | 0/1000 [00:00<?, ?trial/s, best loss=?]/usr/local/lib/python3.10/dist-packages/xgboost/core.py:160: UserWarning: [17:42:03] WARNING: /workspace/src/common/error_msg.cc:58: Falling back to prediction using DMatrix due to mismatched devices. This might lead to higher memory usage and slower performance. XGBoost is running on: cuda:0, while the input data is on: cpu.
-# Potential solutions:
-# - Use a data structure that matches the device ordinal in the booster.
-# - Set the device for booster before call to inplace_predict.
+from scipy.stats import hmean
+import wandb
 
 class XGBClassifier:
     def __init__(self, n_folds=5):
@@ -40,6 +35,10 @@ class XGBClassifier:
             X_train, y_train: Training dataset.
             X_val, y_val: Validation dataset for early stopping.
         """
+
+        # Initialize wandb run
+        wandb.init(project="xgb_optimization", entity="siena", config=self.space)
+        
         self.space['scale_pos_weight'] = np.sum(y_train == 0) / np.sum(y_train == 1)
 
         def objective(params):
@@ -64,10 +63,13 @@ class XGBClassifier:
         best = fmin(fn=objective,
                     space=self.space,
                     algo=tpe.suggest,
-                    max_evals=1000,
+                    max_evals=100,
                     trials=trials)
 
         self.best_params = space_eval(self.space, best)
+
+        wandb.config.update(self.best_params)
+        wandb.finish()
         return self.best_params
 
     def fit(self, X_train, y_train):
