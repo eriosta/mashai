@@ -8,6 +8,11 @@ from sklearn.metrics import roc_auc_score, accuracy_score, confusion_matrix
 from sklearn.model_selection import KFold
 from scipy.stats import hmean, gmean
 
+#   0%|          | 0/1000 [00:00<?, ?trial/s, best loss=?]/usr/local/lib/python3.10/dist-packages/xgboost/core.py:160: UserWarning: [17:42:03] WARNING: /workspace/src/common/error_msg.cc:58: Falling back to prediction using DMatrix due to mismatched devices. This might lead to higher memory usage and slower performance. XGBoost is running on: cuda:0, while the input data is on: cpu.
+# Potential solutions:
+# - Use a data structure that matches the device ordinal in the booster.
+# - Set the device for booster before call to inplace_predict.
+
 class XGBClassifier:
     def __init__(self, n_folds=5):
         self.n_folds = n_folds
@@ -24,6 +29,7 @@ class XGBClassifier:
             'reg_alpha': hp.uniform('reg_alpha', 0, 5),  # Expanded range
             'tree_method': 'hist',  # Use 'hist' for histogram-based algorithm
             'device': 'cuda',  # Use GPU with CUDA
+            'early_stopping_rounds': hp.choice('early_stopping_rounds', range(10, 101, 10))
         }
 
     def optimize(self, X, y):
@@ -33,7 +39,7 @@ class XGBClassifier:
         This method performs hyperparameter optimization to find the best set of parameters
         for the XGBoost model. It uses the TPE (Tree of Parzen Estimators) algorithm provided
         by Hyperopt for searching the hyperparameter space. The optimization process aims to
-        maximize the geometric mean of four key metrics: sensitivity, specificity, positive
+        maximize the harmonic mean of four key metrics: sensitivity, specificity, positive
         predictive value (PPV), and negative predictive value (NPV).
 
         Args:
