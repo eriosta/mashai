@@ -121,15 +121,18 @@ class XGBClassifier:
     def fit(self, X, y):
         if self.best_params is None:
             raise Exception("Model has not been optimized yet. Please run optimize() first.")
+
+        dtrain = xgb.DMatrix(X, label=y)  # Convert to DMatrix
         self.model = xgb.XGBClassifier(**self.best_params, use_label_encoder=False, eval_metric='logloss')
-        self.model.fit(X, y)
+        self.model.fit(dtrain)
 
     def evaluate(self, X_test, y_test):
         if self.model is None:
             raise Exception("Model is not trained. Please run fit() first.")
 
-        y_pred = self.model.predict(X_test)
-        y_pred_proba = self.model.predict_proba(X_test)[:, 1]
+        dtest = xgb.DMatrix(X_test, label=y_test)  # Convert to DMatrix
+        y_pred_proba = self.model.predict(dtest)
+        y_pred = np.round(y_pred_proba)
 
         auroc = roc_auc_score(y_test, y_pred_proba)
         accuracy = accuracy_score(y_test, y_pred)
