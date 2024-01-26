@@ -32,47 +32,31 @@ class XGBClassifier:
             'early_stopping_rounds': hp.choice('early_stopping_rounds', range(10, 101, 10))
         }
 
-    def optimize(self, X, y):
+    def optimize(self, X_train, y_train, X_val, y_val):
         """
         Optimize the hyperparameters of the XGBoost model using Hyperopt.
 
         Args:
-            X (pandas.DataFrame or numpy.ndarray): The feature dataset used for training.
-            y (pandas.Series or numpy.ndarray): The target values associated with the features.
-
-        Returns:
-            dict: The best hyperparameters found by the optimization process.
+            X_train, y_train: Training dataset.
+            X_val, y_val: Validation dataset for early stopping.
         """
-        # Reset index to ensure compatibility with KFold indices
-        X = X.reset_index(drop=True)
-        y = y.reset_index(drop=True)
-
-        scale_pos_weight = np.sum(y == 0) / np.sum(y == 1)
-        self.space['scale_pos_weight'] = scale_pos_weight
+        self.space['scale_pos_weight'] = np.sum(y_train == 0) / np.sum(y_train == 1)
 
         def objective(params):
-            kf = KFold(n_splits=self.n_folds, shuffle=True)
-            fold_metrics = []
+            clf = xgb.XGBClassifier(**params, use_label_encoder=False, eval_metric='logloss')
+            clf.fit(X_train, y_train, eval_set=[(X_val, y_val)], early_stopping_rounds=10)
 
-            for train_index, val_index in kf.split(X):
-                X_train, X_val = X.iloc[train_index], X.iloc[val_index]
-                y_train, y_val = y.iloc[train_index], y.iloc[val_index]
+            y_pred = clf.predict(X_val)
+            tn, fp, fn, tp = confusion_matrix(y_val, y_pred).ravel()
 
-                clf = xgb.XGBClassifier(**params, use_label_encoder=False, eval_metric='logloss')
-                clf.fit(X_train, y_train, eval_set=[(X_val, y_val)], early_stopping_rounds=10)
+            sensitivity = tp / (tp + fn) if (tp + fn) > 0 else 0
+            specificity = tn / (tn + fp) if (tn + fp) > 0 else 0
+            ppv = tp / (tp + fp) if (tp + fp) > 0 else 0
+            npv = tn / (tn + fn) if (tn + fn) > 0 else 0
 
-                y_pred = clf.predict(X_val)
-                tn, fp, fn, tp = confusion_matrix(y_val, y_pred).ravel()
+            mean = hmean([metric for metric in [sensitivity, specificity, ppv, npv] if metric > 0])
 
-                sensitivity = tp / (tp + fn) if (tp + fn) > 0 else 0
-                specificity = tn / (tn + fp) if (tn + fp) > 0 else 0
-                ppv = tp / (tp + fp) if (tp + fp) > 0 else 0
-                npv = tn / (tn + fn) if (tn + fn) > 0 else 0
-
-                mean = hmean([metric for metric in [sensitivity, specificity, ppv, npv] if metric > 0])
-                fold_metrics.append(mean)
-
-            return {'loss': -np.mean(fold_metrics), 'status': STATUS_OK}
+            return {'loss': -np.mean(mean), 'status': STATUS_OK}
 
         trials = Trials()
         best = fmin(fn=objective,
@@ -84,11 +68,9 @@ class XGBClassifier:
         self.best_params = space_eval(self.space, best)
         return self.best_params
 
-    def fit(self, X_train, y_train, X_val=None, y_val=None):
+    def fit(self, X_train, y_train):
         """
-        Modify documentation to include new optional parameters:
-        X_val (optional): Validation feature dataset.
-        y_val (optional): Validation target values.
+        Fit the XGBoost model on the training dataset.
         """
         if self.best_params is None:
             raise Exception("Model has not been optimized yet. Please run optimize() first.")
@@ -97,6 +79,9 @@ class XGBClassifier:
         self.model.fit(X_train, y_train)
 
     def evaluate(self, X_test, y_test):
+        """
+        Evaluate the XGBoost model on the test dataset.
+        """
         if self.model is None:
             raise Exception("Model is not trained. Please run fit() first.")
 
