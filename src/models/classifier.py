@@ -57,6 +57,16 @@ class XGBClassifier:
 
             mean = hmean([metric for metric in [sensitivity, specificity, ppv, npv] if metric > 0])
 
+            # Log metrics for each trial
+            wandb.log({
+                'hyperparams': params,
+                'loss': -np.mean(mean),
+                'sensitivity': sensitivity,
+                'specificity': specificity,
+                'ppv': ppv,
+                'npv': npv
+            })
+
             return {'loss': -np.mean(mean), 'status': STATUS_OK}
 
         trials = Trials()
@@ -68,8 +78,6 @@ class XGBClassifier:
 
         self.best_params = space_eval(self.space, best)
 
-        wandb.config.update(self.best_params)
-        wandb.finish()
         return self.best_params
 
     def fit(self, X_train, y_train):
