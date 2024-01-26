@@ -35,13 +35,14 @@ class XGBClassifier:
             X_train, y_train: Training dataset.
             X_val, y_val: Validation dataset for early stopping.
         """
-
-        # Initialize wandb run
-        wandb.init(project="xgb_optimization", entity="siena", config=self.space)
         
         self.space['scale_pos_weight'] = np.sum(y_train == 0) / np.sum(y_train == 1)
 
-        def objective(params):
+        def objective(params):   
+            
+            # Initialize wandb run
+            wandb.init(project="xgb_optimization", entity="siena", config=self.space)
+
             params['early_stopping_rounds'] = 10
 
             clf = xgb.XGBClassifier(**params, use_label_encoder=False, eval_metric='logloss')
