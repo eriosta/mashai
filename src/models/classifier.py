@@ -39,7 +39,7 @@ class XGBClassifier:
         self.space['scale_pos_weight'] = np.sum(y_train == 0) / np.sum(y_train == 1)
 
         def objective(params):   
-            
+
             # Initialize wandb run
             wandb.init(project="xgb_optimization", entity="siena", config=self.space)
 
@@ -61,7 +61,7 @@ class XGBClassifier:
             # Log metrics for each trial
             wandb.log({
                 'hyperparams': params,
-                'loss': -np.mean(mean),
+                'loss': np.mean(mean),
                 'sensitivity': sensitivity,
                 'specificity': specificity,
                 'ppv': ppv,
