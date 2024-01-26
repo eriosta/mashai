@@ -43,8 +43,10 @@ class XGBClassifier:
         self.space['scale_pos_weight'] = np.sum(y_train == 0) / np.sum(y_train == 1)
 
         def objective(params):
+            params['early_stopping_rounds'] = 10
+
             clf = xgb.XGBClassifier(**params, use_label_encoder=False, eval_metric='logloss')
-            clf.fit(X_train, y_train, eval_set=[(X_val, y_val)], early_stopping_rounds=10)
+            clf.fit(X_train, y_train, eval_set=[(X_val, y_val)])
 
             y_pred = clf.predict(X_val)
             tn, fp, fn, tp = confusion_matrix(y_val, y_pred).ravel()
