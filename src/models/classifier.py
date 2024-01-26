@@ -81,7 +81,7 @@ class XGBClassifier:
 
         return self.best_params
 
-    def fit(self, X_train, y_train):
+    def fit(self, X_train, y_train, X_val=None, y_val=None):
         """
         Fit the XGBoost model on the training dataset.
         """
@@ -89,7 +89,11 @@ class XGBClassifier:
             raise Exception("Model has not been optimized yet. Please run optimize() first.")
         
         self.model = xgb.XGBClassifier(**self.best_params, use_label_encoder=False, eval_metric='logloss')
-        self.model.fit(X_train, y_train)
+        
+        if X_val is not None and y_val is not None:
+            self.model.fit(X_train, y_train, early_stopping_rounds=10, eval_set=[(X_val, y_val)])
+        else:
+            self.model.fit(X_train, y_train)
 
     def evaluate(self, X_test, y_test):
         """
