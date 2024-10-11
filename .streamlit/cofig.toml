@@ -1,0 +1,11 @@
+# .streamlit/config.toml
+
+
+[browser]
+# Set the title of the app
+title = "MASLD AI"
+
+[global]
+maxCachedEntries = 100
+maxUploadSize = 200
+maxThreads = 4
